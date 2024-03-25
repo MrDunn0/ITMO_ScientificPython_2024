@@ -45,20 +45,23 @@ def parse_response_uniprot(response: dict):
 def parse_response_ensembl(response: dict):
     output = {}
     for entry, annotations in response.json().items():
-        coordinates = f'{annotations['seq_region_name']}:{annotations['start']}-{annotations['end']}'
-        output[entry] = {
-            'species': annotations['species'],
-            'object_type': annotations['object_type'],
-            'biotype': annotations['biotype'],
-            'assembly_name': annotations['assembly_name'],
-            'strand': annotations['strand'],
-            'coordinates': coordinates
-        }
+        if annotations:
+            coordinates = f"{annotations['seq_region_name']}:{annotations['start']}-{annotations['end']}"
+            output[entry] = {
+                'species': annotations['species'],
+                'object_type': annotations['object_type'],
+                'biotype': annotations['biotype'],
+                'assembly_name': annotations['assembly_name'],
+                'strand': annotations['strand'],
+                'coordinates': coordinates
+            }
 
-        if 'display_name' in annotations:
-            output[entry]['display_name'] = annotations['display_name']
-        if 'description' in annotations:
-            output[entry]['description'] = annotations['description'],
+            if 'display_name' in annotations:
+                output[entry]['display_name'] = annotations['display_name']
+            if 'description' in annotations:
+                output[entry]['description'] = annotations['description'],
+        else:
+            output[entry] = None
     return output
 
 
@@ -75,7 +78,7 @@ def get_db_id_info(ids: list):
     # MGP prefixes were ignored
 
     ensembl_id_regex = re.compile(
-        'ENS(\w{3})?\w\d{11}'
+        'ENS(\w{3})?\w{1,2}\d{11}'
     )
 
     # Assume that all IDs come from a single DB
@@ -92,7 +95,8 @@ def get_db_id_info(ids: list):
 
 
 _uniprot_test_accessions = ['A2BC19', 'P12345', 'Q9Y2H6']
-_ensembl_test_accessions = ['ENSMUSG00000031201', 'ENSG00000012048', 'ENSGGOT00000013330']
+_ensembl_test_accessions = [
+    'ENSMUSG00000031201', 'ENSG00000012048', 'ENSGGOT00000013330', 'ENSGT00560000077204']
 _wrong_accession = ['ABOBABA32282']
 
 
